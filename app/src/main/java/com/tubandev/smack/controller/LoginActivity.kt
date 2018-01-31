@@ -1,9 +1,10 @@
-package com.tubandev.smack
+package com.tubandev.smack.controller
 
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import com.tubandev.smack.R
 
 class LoginActivity : AppCompatActivity() {
 
