@@ -9,8 +9,11 @@ import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import com.tubandev.smack.R
 import com.tubandev.smack.services.AuthService
 import com.tubandev.smack.services.UserDataService
@@ -25,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        hideKeyboard()
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -72,10 +76,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun addChannelBtnNavClicked(view: View) {
+        if (AuthService.isLoggedIn) {
+            val builder = AlertDialog.Builder(this)
+            val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
 
+            builder.setView(dialogView)
+                    .setPositiveButton("Add") { dialogInterface, i ->
+                        val nameText = dialogView.findViewById<EditText>(R.id.addChannelNameText)
+                        val descriptionText = dialogView.findViewById<EditText>(R.id.addChannelDescriptionText)
+
+                        val channelName = nameText.text.toString()
+                        val channelDesc = descriptionText.text.toString()
+                        hideKeyboard()
+                    }
+                    .setNegativeButton("Cancel"){ dialogInterface, i ->
+                        hideKeyboard()
+                    }
+                    .show()
+        }
     }
 
     fun sendMessageBtnClicked(view: View) {
 
+    }
+
+    fun hideKeyboard() {
+        val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        if (inputManager.isAcceptingText) {
+            inputManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
+        }
     }
 }
