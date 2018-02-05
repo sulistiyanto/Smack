@@ -18,11 +18,15 @@ import com.tubandev.smack.R
 import com.tubandev.smack.services.AuthService
 import com.tubandev.smack.services.UserDataService
 import com.tubandev.smack.utilities.BROADCAST_USER_DATA_CHANGE
+import com.tubandev.smack.utilities.SOCKET_URL
+import io.socket.client.IO
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.nav_header_main.*
 
 class MainActivity : AppCompatActivity() {
+
+    val socket = IO.socket(SOCKET_URL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +39,23 @@ class MainActivity : AppCompatActivity() {
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
+    }
+
+    override fun onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
                 IntentFilter(BROADCAST_USER_DATA_CHANGE))
+        socket.connect()
+        super.onResume()
+    }
+
+    override fun onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        socket.disconnect()
+        super.onDestroy()
     }
 
     private val userDataChangeReceiver = object :BroadcastReceiver() {
@@ -87,7 +106,8 @@ class MainActivity : AppCompatActivity() {
 
                         val channelName = nameText.text.toString()
                         val channelDesc = descriptionText.text.toString()
-                        hideKeyboard()
+
+                        socket.emit("newChannel", channelName, channelDesc)
                     }
                     .setNegativeButton("Cancel"){ dialogInterface, i ->
                         hideKeyboard()
@@ -97,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun sendMessageBtnClicked(view: View) {
-
+        hideKeyboard()
     }
 
     fun hideKeyboard() {
