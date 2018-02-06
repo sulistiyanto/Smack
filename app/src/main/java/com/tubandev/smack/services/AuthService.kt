@@ -9,6 +9,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.tubandev.smack.controller.App
 import com.tubandev.smack.utilities.*
 import org.json.JSONException
 import org.json.JSONObject
@@ -17,10 +18,6 @@ import org.json.JSONObject
  * Created by sulistiyanto on 31/01/18.
  */
 object AuthService {
-
-    var isLoggedIn = false
-    var userEmail = ""
-    var authToken = ""
 
     fun registerUser(context: Context, email : String, password : String, complete : (Boolean) -> Unit) {
 
@@ -45,7 +42,7 @@ object AuthService {
         }
 
         registerRequest.timeoutMs.times(200000)
-        Volley.newRequestQueue(context).add(registerRequest)
+        App.prefs.requestQueue.add(registerRequest)
     }
 
     fun loginUser(context: Context, email : String, password : String, complete : (Boolean) -> Unit) {
@@ -57,9 +54,9 @@ object AuthService {
 
         val loginRequest = object : JsonObjectRequest(Request.Method.POST, URL_LOGIN, null, Response.Listener { response ->
             try {
-                authToken = response.getString("token")
-                userEmail = response.getString("user")
-                isLoggedIn = true
+                App.prefs.authToken = response.getString("token")
+                App.prefs.userEmail = response.getString("user")
+                App.prefs.isLoggedIn = true
                 complete(true)
                 println(response)
             } catch (e : JSONException) {
@@ -81,7 +78,7 @@ object AuthService {
         }
 
         loginRequest.timeoutMs.times(200000)
-        Volley.newRequestQueue(context).add(loginRequest)
+        App.prefs.requestQueue.add(loginRequest)
     }
 
     fun createUser(context: Context, name : String, email : String, avatarName : String, avatarColor : String, complete: (Boolean) -> Unit) {
@@ -119,17 +116,17 @@ object AuthService {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                headers.put("Authorization", "Bearer $authToken")
+                headers.put("Authorization", "Bearer ${App.prefs.authToken}")
                 return headers
             }
         }
 
         createRequest.timeoutMs.times(200000)
-        Volley.newRequestQueue(context).add(createRequest)
+        App.prefs.requestQueue.add(createRequest)
     }
 
     fun findUserByEmail(context: Context, complete: (Boolean) -> Unit) {
-        val findUserRequest = object : JsonObjectRequest(Method.GET, "$URL_GET_USER$userEmail", null, Response.Listener { response ->
+        val findUserRequest = object : JsonObjectRequest(Method.GET, "$URL_GET_USER${App.prefs.userEmail}", null, Response.Listener { response ->
 
             try {
                 UserDataService.name = response.getString("name")
@@ -156,12 +153,12 @@ object AuthService {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                headers.put("Authorization", "Bearer $authToken")
+                headers.put("Authorization", "Bearer ${App.prefs.authToken}")
                 return headers
             }
         }
 
         findUserRequest.timeoutMs.times(200000)
-        Volley.newRequestQueue(context).add(findUserRequest)
+        App.prefs.requestQueue.add(findUserRequest)
     }
 }
