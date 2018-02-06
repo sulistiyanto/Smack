@@ -1,10 +1,8 @@
 package com.tubandev.smack.services
 
-import android.content.Context
 import android.util.Log
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.Volley
 import com.tubandev.smack.controller.App
 import com.tubandev.smack.model.Channel
 import com.tubandev.smack.utilities.URL_GET_CHANNEL
@@ -18,7 +16,7 @@ object MessageService {
 
     val channels = ArrayList<Channel>()
 
-    fun getChannel(context: Context, complete: (Boolean) -> Unit) {
+    fun getChannel(complete: (Boolean) -> Unit) {
 
         val channelRequest = object : JsonArrayRequest(Method.GET, URL_GET_CHANNEL, null, Response.Listener { response ->
 
